@@ -1,0 +1,62 @@
+%% ************************************************
+% 作者：石兵
+% 算法名称：经典遗传算法（轮盘赌法，单点交叉，单点遗传）
+% 创建日期：4/17/2017， 17：45
+%---------------------------------------------------------
+
+%% 清理缓存空间
+clc;clear;
+
+%% 遗传算法参数初始化
+elitism = true;         %选择精英操作
+population_size = 200;  %种群大小
+generation_size = 200;  %最大迭代次数
+chromosome_size = 17;   %染色体长度（需要根据具体题目做修改）
+rate_cross = 0.6;       %交叉概率
+rate_mutate = 0.01;     %变异概率
+upper_bound = 5;        %自变量上限
+lower_bound = 0;        %自变量下限
+
+%% 主函数用到的全局变量列表
+global best_individual; %历史最佳个体
+global best_fitness;    %历史最佳适应度值
+global best_generation; %历史最佳个体出现的代数
+global G;               %当前进化代数
+global fitness_average;
+%% 初始一个种群
+init(population_size,chromosome_size);
+
+for G = 1:generation_size
+    
+    %% 计算适应
+    fitness(population_size,chromosome_size,lower_bound,upper_bound);
+    
+    %% 排序并记录最优个体
+    Rank(population_size);
+    
+    %% 选择多对父母
+    Select(population_size,chromosome_size,elitism);
+    
+    %% 交叉
+    CrossOver(population_size,chromosome_size,rate_cross)
+    
+    %% 变异
+    Mutation(population_size,chromosome_size,rate_mutate)
+    
+end
+
+%% 画图
+figure()
+plot(1:generation_size,fitness_average,'b-');
+hold on
+title('每代平均个体适应度');
+
+%% 对最终结果进行解码并输出
+value = 0;
+for position = 1:chromosome_size
+    value = value + 2^(position-1)*best_individual(position);
+end
+value = (upper_bound-lower_bound) * value / (2^chromosome_size-1)...
+    + lower_bound;
+fprintf('最佳个体：%f, 最佳适应度：%f, 最佳代数：%d\n',value,best_fitness,best_generation);
+
